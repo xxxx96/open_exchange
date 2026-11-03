@@ -1,4 +1,4 @@
-package org.openexchange.common.entity;
+package org.openexchange.common.web.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

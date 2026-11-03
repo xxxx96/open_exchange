@@ -1,4 +1,4 @@
-package org.openexchange.common.enums;
+package org.openexchange.common.web.enums;
 
 /**
  * KYC等级

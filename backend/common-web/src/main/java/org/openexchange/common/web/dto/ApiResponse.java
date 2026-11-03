@@ -1,8 +1,8 @@
-package org.openexchange.common.dto;
+package org.openexchange.common.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-import org.openexchange.common.exception.ErrorCode;
+import org.openexchange.common.web.exception.ErrorCode;
 
 import java.time.Instant;
 

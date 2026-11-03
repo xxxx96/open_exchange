@@ -1,4 +1,4 @@
-package org.openexchange.common.exception;
+package org.openexchange.common.web.exception;
 
 import lombok.Getter;
 
