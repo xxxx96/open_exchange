@@ -2,7 +2,6 @@ package org.openexchange.gateway.filter;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -15,17 +14,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import javax.crypto.SecretKey;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 
 @Slf4j
 @Component
 public class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
 
-    private final SecretKey accessTokenKey;
+    private final PublicKey accessTokenPublicKey;
 
     // 从配置读取 access token 密钥，与 user-service 的 JwtTokenProvider 使用同一个配置项
-    public JwtAuthGlobalFilter(@Value("${jwt.access-token-secret}")String accessTokenSecret) {
-        this.accessTokenKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessTokenSecret));
+    public JwtAuthGlobalFilter(@Value("${jwt.access-token-public-secret}")String accessTokenPublicKeyB64) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        // 使用 Java 标准 KeyFactory 构造 RSA 密钥
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        byte[] accessPublicBytes  = Decoders.BASE64.decode(accessTokenPublicKeyB64);
+        this.accessTokenPublicKey  = keyFactory.generatePublic(new X509EncodedKeySpec(accessPublicBytes));
     }
 
 
@@ -49,7 +55,7 @@ public class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
         try {
             // 3. 解析 access token（与 JwtTokenProvider 使用相同密钥）
             Jws<Claims> jws = Jwts.parser()
-                    .verifyWith(accessTokenKey)
+                    .verifyWith(accessTokenPublicKey)
                     .build()
                     .parseSignedClaims(token);
 

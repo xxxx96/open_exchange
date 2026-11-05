@@ -53,4 +53,4 @@ logging:
     com.exchange: DEBUG
     org.springframework.cloud.gateway: INFO
 jwt:
-  access-token-secret: ${JWT_ACCESS_SECRET:changeme-access-secret-key-min-256-bits}
+  access-token-public-secret: ${JWT_ACCESS_PUBLIC_SECRET:changeme-access-secret-key-min-256-bits}

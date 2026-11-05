@@ -1,0 +1,7 @@
+jwt:
+  access-token-private-key: ${ACCESS-TOKEN-PRIVATE-KEY}
+  access-token-public-key: ${ACCESS-TOKEN-PUBLIC-KEY}
+  refresh-token-private-key: ${REFRESH-TOKEN-PRIVATE-KEY}
+  refresh-token-public-key: ${REFRESH-TOKEN-PUBLIC-KEY}
+  access-token-expiration: 1800000      # 30 分钟
+  refresh-token-expiration: 604800000   # 7 天
