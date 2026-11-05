@@ -92,6 +92,10 @@ public class JwtTokenProvider {
     }
 
     // ---------- 验证 ----------
+    public long getAccessTokenExpiration() {
+        return accessTokenExpiration;
+    }
+
     public boolean validateAccessToken(String token) {
         try {
             parseAccessToken(token);
