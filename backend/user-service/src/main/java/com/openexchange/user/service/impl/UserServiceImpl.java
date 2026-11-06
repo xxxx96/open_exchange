@@ -1,16 +1,16 @@
-package com.openexchange.userservice.service.impl;
+package com.openexchange.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
-import com.openexchange.userservice.dto.LoginRequest;
-import com.openexchange.userservice.dto.RegisterRequest;
-import com.openexchange.userservice.dto.TokenResponse;
-import com.openexchange.userservice.dto.UserInfoResponse;
-import com.openexchange.userservice.entity.User;
-import com.openexchange.userservice.mapper.UserMapper;
-import com.openexchange.userservice.security.JwtTokenProvider;
-import com.openexchange.userservice.security.RefreshTokenBlacklist;
-import com.openexchange.userservice.service.IUserService;
+import com.openexchange.user.dto.LoginRequest;
+import com.openexchange.user.dto.RegisterRequest;
+import com.openexchange.user.dto.TokenResponse;
+import com.openexchange.user.dto.UserInfoResponse;
+import com.openexchange.user.entity.User;
+import com.openexchange.user.mapper.UserMapper;
+import com.openexchange.user.security.JwtTokenProvider;
+import com.openexchange.user.security.RefreshTokenBlacklist;
+import com.openexchange.user.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openexchange.common.web.exception.BusinessException;
@@ -35,8 +35,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
-    private static final String DEFAULT_STATUS = "ACTIVE";
-    private static final String DEFAULT_KYC_LEVEL = "LEVEL_0";
     private static final String REF_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
     private final PasswordEncoder passwordEncoder;
@@ -63,8 +61,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setUid(generateUid());
         user.setRefCode(generateRefCode());
-        user.setStatus(DEFAULT_STATUS);
-        user.setKycLevel(DEFAULT_KYC_LEVEL);
         user.setGoogleAuthEnabled(false);
         user.setReferredBy(resolveReferrer(request.getRefCode()));
         this.save(user);
@@ -85,7 +81,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
-        if (!DEFAULT_STATUS.equals(user.getStatus())) {
+        if (!User.UserStatus.ACTIVE.equals(user.getStatus())) {
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
 

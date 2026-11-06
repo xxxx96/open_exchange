@@ -102,9 +102,9 @@ public class CodeGenerator {
      */
     public static void main(String[] args) {
         // ====== 只需修改这三个变量 ======
-        String moduleRoot = "backend/user-service";  // 1. 模块目录（相对于项目根目录）
-        String serviceName = "userservice";           // 2. 服务名
-        String[] tables = {"user"};                  // 3. 表名数组
+        String moduleRoot = "backend/wallet-service";  // 1. 模块目录（相对于项目根目录）
+        String serviceName = "wallet";           // 2. 服务名
+        String[] tables = {"wallet","deposit","withdrawal","deposit_address","currency"};// 3. 表名数组
         // =================================
 
         generate(moduleRoot, serviceName, tables);

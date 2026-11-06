@@ -1,4 +1,4 @@
-package com.openexchange.userservice.security;
+package com.openexchange.user.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

@@ -1,7 +1,7 @@
-package com.openexchange.userservice.mapper;
+package com.openexchange.user.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.openexchange.userservice.entity.User;
+import com.openexchange.user.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

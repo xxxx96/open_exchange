@@ -1,4 +1,4 @@
-package com.openexchange.userservice.security;
+package com.openexchange.user.security;
 
 import org.springframework.stereotype.Component;
 

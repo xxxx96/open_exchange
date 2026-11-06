@@ -1,6 +1,6 @@
-package com.openexchange.userservice.dto;
+package com.openexchange.user.dto;
 
-import com.openexchange.userservice.entity.User;
+import com.openexchange.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;

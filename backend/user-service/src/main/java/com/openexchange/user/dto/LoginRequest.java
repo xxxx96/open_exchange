@@ -1,4 +1,4 @@
-package com.openexchange.userservice.dto;
+package com.openexchange.user.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

@@ -1,11 +1,11 @@
-package com.openexchange.userservice.service;
+package com.openexchange.user.service;
 
 import com.baomidou.mybatisplus.spring.service.IService;
-import com.openexchange.userservice.dto.LoginRequest;
-import com.openexchange.userservice.dto.RegisterRequest;
-import com.openexchange.userservice.dto.TokenResponse;
-import com.openexchange.userservice.dto.UserInfoResponse;
-import com.openexchange.userservice.entity.User;
+import com.openexchange.user.dto.LoginRequest;
+import com.openexchange.user.dto.RegisterRequest;
+import com.openexchange.user.dto.TokenResponse;
+import com.openexchange.user.dto.UserInfoResponse;
+import com.openexchange.user.entity.User;
 
 /**
  * <p>

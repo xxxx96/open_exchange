@@ -1,6 +1,6 @@
-package com.openexchange.userservice.config;
+package com.openexchange.user.config;
 
-import com.openexchange.userservice.filter.JwtAuthenticationFilter;
+import com.openexchange.user.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

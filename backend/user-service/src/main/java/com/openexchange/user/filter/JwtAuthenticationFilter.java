@@ -1,7 +1,7 @@
-package com.openexchange.userservice.filter;
+package com.openexchange.user.filter;
 
-import com.openexchange.userservice.security.JwtTokenProvider;
-import com.openexchange.userservice.security.UserPrincipal;
+import com.openexchange.user.security.JwtTokenProvider;
+import com.openexchange.user.security.UserPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

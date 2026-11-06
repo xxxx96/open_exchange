@@ -1,12 +1,12 @@
-package com.openexchange.userservice.controller;
+package com.openexchange.user.controller;
 
-import com.openexchange.userservice.dto.LoginRequest;
-import com.openexchange.userservice.dto.LogoutRequest;
-import com.openexchange.userservice.dto.RegisterRequest;
-import com.openexchange.userservice.dto.TokenResponse;
-import com.openexchange.userservice.dto.UserInfoResponse;
-import com.openexchange.userservice.security.UserPrincipal;
-import com.openexchange.userservice.service.IUserService;
+import com.openexchange.user.dto.LoginRequest;
+import com.openexchange.user.dto.LogoutRequest;
+import com.openexchange.user.dto.RegisterRequest;
+import com.openexchange.user.dto.TokenResponse;
+import com.openexchange.user.dto.UserInfoResponse;
+import com.openexchange.user.security.UserPrincipal;
+import com.openexchange.user.service.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

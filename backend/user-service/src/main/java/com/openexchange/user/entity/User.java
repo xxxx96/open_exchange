@@ -1,4 +1,4 @@
-package com.openexchange.userservice.entity;
+package com.openexchange.user.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.openexchange.common.web.entity.BaseEntity;
-
-import java.io.Serializable;
 
 /**
  * <p>
@@ -40,7 +38,7 @@ public class User extends BaseEntity {
     private String phone;
 
     @TableField("status")
-    private String status;
+    private UserStatus status = UserStatus.ACTIVE;
 
     @TableField("google_auth_secret")
     private String googleAuthSecret;
@@ -52,8 +50,19 @@ public class User extends BaseEntity {
     private String email;
 
     @TableField("kyc_level")
-    private String kycLevel;
+    private KycLevel kycLevel= KycLevel.NONE;
 
     @TableField("password_hash")
     private String passwordHash;
+
+    public enum KycLevel {
+        NONE,
+        BASIC,
+        ADVANCED
+    }
+
+    public enum UserStatus {
+        ACTIVE, FROZEN, BANNED
+    }
 }
+
