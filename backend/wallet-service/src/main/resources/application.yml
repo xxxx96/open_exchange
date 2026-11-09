@@ -1,0 +1,31 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: wallet-service
+  datasource:
+    # PostgreSQL 连接：通过环境变量注入，默认指向本机 exchange 库
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:exchange}
+    username: ${DB_USER:exchange}
+    password: ${DB_PASSWORD:exchange}
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    # 驼峰映射：实体 createdAt <-> 列 created_at（BaseEntity 已显式 @TableField，此为兜底）
+    map-underscore-to-camel-case: true
+
+# 链上节点连接：Sepolia 公共 RPC + Bitcoin testnet4 第三方网关
+# 均为公共免费端点（无需 API Key，有速率限制）；生产环境替换为付费节点或自建节点
+chain:
+  timeout-ms: 10000                                   # 链上请求读超时
+  eth:
+    rpc-url: https://ethereum-sepolia-rpc.publicnode.com   # Sepolia 公共 JSON-RPC（PublicNode）
+    expected-chain-id: 11155111                       # Sepolia 链 ID（0xaa36a7），探测时校验防连错网络
+  btc:
+    gateway-base-url: https://mempool.space/testnet4  # testnet4 第三方网关（mempool.space REST API）
+
+logging:
+  level:
+    com.openexchange.wallet: DEBUG
