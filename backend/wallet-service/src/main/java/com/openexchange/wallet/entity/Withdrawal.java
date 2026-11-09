@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @ToString
-@TableName("withdrawal")
+@TableName("withdrawals")
 @Schema(name = "Withdrawal", description = "")
 public class Withdrawal extends BaseEntity {
 

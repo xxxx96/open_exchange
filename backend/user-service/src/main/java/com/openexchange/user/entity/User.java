@@ -19,7 +19,7 @@ import org.openexchange.common.web.entity.BaseEntity;
 @Getter
 @Setter
 @ToString
-@TableName("user")
+@TableName("users")
 @Schema(name = "User", description = "")
 public class User extends BaseEntity {
 

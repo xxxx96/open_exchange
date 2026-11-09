@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@TableName("deposit")
+@TableName("deposits")
 @Schema(name = "Deposit", description = "")
 public class Deposit extends BaseEntity {
 
@@ -64,6 +64,13 @@ public class Deposit extends BaseEntity {
 
     @TableField("tx_hash")
     private String txHash;
+
+    /**
+     * 交易日志索引：与 currency_id + tx_hash 共同构成充值幂等键。
+     * 同一笔链上交易可能包含多笔转账事件（如 ERC20 Transfer log），需以 log_index 区分。
+     */
+    @TableField("log_index")
+    private Long logIndex;
 
     @TableField("status")
     private String status;

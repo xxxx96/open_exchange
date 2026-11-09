@@ -1,5 +1,6 @@
 package com.openexchange.wallet.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,7 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2026-11-06
  */
 @RestController
-@RequestMapping("/wallet")
+@RequestMapping("/api/v1/wallet")
+@RequiredArgsConstructor
 public class WalletController {
 
 }

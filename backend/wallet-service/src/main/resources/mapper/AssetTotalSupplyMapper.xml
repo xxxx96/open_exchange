@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.openexchange.wallet.mapper.AssetTotalSupplyMapper">
+
+    <!-- 原子累加全局资产发行量：upsert 写法，冲突时在 SQL 层完成累加，保证并发安全 -->
+    <insert id="addTotalSupply">
+        INSERT INTO asset_total_supply (currency_id, total_supply, created_at, updated_at)
+        VALUES (#{currencyId}, #{amount}, NOW(), NOW())
+        ON CONFLICT (currency_id)
+        DO UPDATE SET total_supply = asset_total_supply.total_supply + EXCLUDED.total_supply,
+                      updated_at = NOW()
+    </insert>
+
+</mapper>

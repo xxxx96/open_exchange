@@ -51,8 +51,8 @@ public class UserInfoResponse {
                 .uid(user.getUid())
                 .email(user.getEmail())
                 .phone(user.getPhone())
-                .kycLevel(user.getKycLevel())
-                .status(user.getStatus())
+                .kycLevel(user.getKycLevel() != null ? user.getKycLevel().name() : null)
+                .status(user.getStatus() != null ? user.getStatus().name() : null)
                 .refCode(user.getRefCode())
                 .createdAt(user.getCreatedAt())
                 .build();

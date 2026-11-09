@@ -21,7 +21,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-@TableName("deposit_address")
+@TableName("deposit_addresses")
 @Schema(name = "DepositAddress", description = "")
 public class DepositAddress extends BaseEntity {
 

@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @ToString
-@TableName("currency")
+@TableName("currencies")
 @Schema(name = "Currency", description = "")
 public class Currency extends BaseEntity {
 

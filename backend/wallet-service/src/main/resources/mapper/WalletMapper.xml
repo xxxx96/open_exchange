@@ -2,4 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.openexchange.wallet.mapper.WalletMapper">
 
+    <!-- 原子入账：在 SQL 层完成可用余额累加，避免并发丢失更新 -->
+    <update id="creditBalance">
+        UPDATE wallets
+        SET balance = balance + #{amount},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+          AND currency_id = #{currencyId}
+          AND wallet_type = 'SPOT'
+    </update>
+
+    <!-- 原子冻结：余额校验（balance &gt;= required）与冻结合并在一条 UPDATE 中，杜绝并发超扣 -->
+    <update id="freezeBalance">
+        UPDATE wallets
+        SET balance = balance - #{amount},
+            frozen_balance = frozen_balance + #{amount},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+          AND currency_id = #{currencyId}
+          AND wallet_type = 'SPOT'
+          AND balance &gt;= #{required}
+    </update>
+
 </mapper>
