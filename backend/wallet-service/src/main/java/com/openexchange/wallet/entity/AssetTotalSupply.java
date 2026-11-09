@@ -30,7 +30,7 @@ public class AssetTotalSupply extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 资产 ID（currencies 表主键），唯一索引保证每种资产一行
+     * 资产 ID（currency 表主键），唯一索引保证每种资产一行
      */
     @Schema(description = "资产 ID（currencies 表主键）")
     @TableField("currency_id")

@@ -19,6 +19,11 @@ spring:
           uri: http://localhost:8082
           predicates:
             - Path=/api/v1/wallet/**
+        # Deposit / Withdrawal / Balance / Chain Status（wallet-service 提供）
+        - id: wallet-transfer
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/deposit/**,/api/v1/withdrawal/**,/api/v1/balance,/api/v1/chain/**
         # Spot Trading
         - id: spot-trading
           uri: http://localhost:8084
