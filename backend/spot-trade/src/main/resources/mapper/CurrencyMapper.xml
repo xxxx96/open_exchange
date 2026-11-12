@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.openexchange.spot.mapper.CurrencyMapper">
+
+    <!-- 按符号精确解析币种（现货记账以资产维度，不区分链） -->
+    <select id="selectBySymbol" resultType="com.openexchange.spot.entity.Currency">
+        SELECT * FROM currencies WHERE symbol = #{symbol} LIMIT 1
+    </select>
+
+</mapper>

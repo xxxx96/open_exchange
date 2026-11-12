@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.openexchange.spot.mapper.SpotSerialMapper">
+
+    <!--
+      原子取号：数据修改 CTE 实现 upsert，单条语句完成「无则插入 1、有则 +1」，
+      避免先查后插的并发重复；订单落库前即需对外单号，故不能依赖自增主键。
+    -->
+    <select id="nextSerial" resultType="java.lang.Long">
+        WITH ins AS (
+            INSERT INTO spot_serial (biz_date, biz_type, last_seq)
+            VALUES (#{bizDate}, #{bizType}, 1)
+            ON CONFLICT (biz_date, biz_type) DO UPDATE SET last_seq = spot_serial.last_seq + 1
+            RETURNING last_seq
+        )
+        SELECT last_seq FROM ins
+    </select>
+
+</mapper>

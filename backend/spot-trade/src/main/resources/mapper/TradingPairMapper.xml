@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.openexchange.spot.mapper.TradingPairMapper">
+
+    <!--
+      按符号查询交易对：SQL 层归一化（去斜杠 + 大写），
+      API 的 BTC/USDT 与库中紧凑符号 BTCUSDT 均可命中（字典表数据量小，全表扫描可接受）。
+    -->
+    <select id="selectBySymbolAny" resultType="com.openexchange.spot.entity.TradingPair">
+        SELECT * FROM trading_pairs
+        WHERE REPLACE(UPPER(symbol), '/', '') = #{symbol}
+        LIMIT 1
+    </select>
+
+</mapper>

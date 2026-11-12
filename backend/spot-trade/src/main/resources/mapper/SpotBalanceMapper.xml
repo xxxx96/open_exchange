@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.openexchange.spot.mapper.SpotBalanceMapper">
+
+    <!--
+      现货钱包（wallets 表 wallet_type='SPOT' 行）原子操作。
+      全部在 SQL 层完成余额变动：条件即校验，影响行数为 0 即余额/冻结不足，
+      杜绝并发超扣与丢失更新（与 wallet-service 的 WalletMapper 同一套思路）。
+    -->
+
+    <!-- 冻结：available -= amount，frozen += amount -->
+    <update id="freeze">
+        UPDATE wallets
+        SET balance = balance - #{amount},
+            frozen_balance = frozen_balance + #{amount},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+          AND currency_id = #{currencyId}
+          AND wallet_type = 'SPOT'
+          AND balance &gt;= #{amount}
+    </update>
+
+    <!-- 解冻：frozen -= amount，available += amount（撤单退回） -->
+    <update id="unfreeze">
+        UPDATE wallets
+        SET balance = balance + #{amount},
+            frozen_balance = frozen_balance - #{amount},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+          AND currency_id = #{currencyId}
+          AND wallet_type = 'SPOT'
+          AND frozen_balance &gt;= #{amount}
+    </update>
+
+    <!-- 核销冻结：frozen -= amount（成交花费，不退回 available） -->
+    <update id="consumeFrozen">
+        UPDATE wallets
+        SET frozen_balance = frozen_balance - #{amount},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+          AND currency_id = #{currencyId}
+          AND wallet_type = 'SPOT'
+          AND frozen_balance &gt;= #{amount}
+    </update>
+
+    <!-- 入账：available += amount（成交收到资产） -->
+    <update id="credit">
+        UPDATE wallets
+        SET balance = balance + #{amount},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+          AND currency_id = #{currencyId}
+          AND wallet_type = 'SPOT'
+    </update>
+
+</mapper>

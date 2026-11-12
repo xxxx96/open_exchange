@@ -9,6 +9,17 @@ spring:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:exchange}
     username: ${DB_USER:exchange}
     password: ${DB_PASSWORD:exchange}
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}           # Kafka 集群地址，环境变量可覆盖
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all                                                  # 充值通知为账本关键事件，等待全部副本确认
+    consumer:
+      group-id: wallet-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -25,6 +36,11 @@ chain:
     expected-chain-id: 11155111                       # Sepolia 链 ID（0xaa36a7），探测时校验防连错网络
   btc:
     gateway-base-url: https://mempool.space/testnet4  # testnet4 第三方网关（mempool.space REST API）
+
+# 消息通知配置：充值到账事件通过 Kafka 异步分发
+wallet:
+  notify:
+    deposit-topic: wallet-deposit-credited
 
 logging:
   level:

@@ -1,5 +1,7 @@
 package com.openexchange.wallet.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.spring.service.impl.ServiceImpl;
 import com.openexchange.wallet.dto.DepositCallbackRequest;
@@ -11,11 +13,13 @@ import com.openexchange.wallet.mapper.WalletMapper;
 import com.openexchange.wallet.service.ICurrencyService;
 import com.openexchange.wallet.service.IDepositService;
 import com.openexchange.wallet.service.IWalletService;
+import com.openexchange.wallet.config.WalletNotifyProperties;
 import com.openexchange.wallet.event.DepositCreditedEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.openexchange.common.web.exception.BusinessException;
 import org.openexchange.common.web.exception.ErrorCode;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -34,6 +38,7 @@ import java.time.LocalDateTime;
  * @author yanglei
  * @since 2026-11-06
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DepositServiceImpl extends ServiceImpl<DepositMapper, Deposit> implements IDepositService {
@@ -47,7 +52,12 @@ public class DepositServiceImpl extends ServiceImpl<DepositMapper, Deposit> impl
     private final IWalletService walletService;
     private final WalletMapper walletMapper;
     private final AssetTotalSupplyMapper assetTotalSupplyMapper;
-    private final ApplicationEventPublisher eventPublisher;
+    /** 充值到账消息生产者：入账事务提交后向 Kafka 发送通知消息 */
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    /** 消息体 JSON 序列化器 */
+    private final ObjectMapper objectMapper;
+    /** 消息通知配置（充值到账主题名） */
+    private final WalletNotifyProperties notifyProperties;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -96,15 +106,36 @@ public class DepositServiceImpl extends ServiceImpl<DepositMapper, Deposit> impl
         deposit.setCreditedAt(LocalDateTime.now());
         save(deposit);
 
-        // 4. 事务提交成功后异步发送通知（WebSocket/推送），避免通知先于入账对外可见
+        // 4. 事务提交成功后发送 Kafka 充值到账消息（异步通知下游 WebSocket/推送），
+        //    避免通知先于入账对外可见；消息投递为 at-least-once，重复通知无害
+        //    （账本入账的幂等性已在前置步骤由唯一索引保证）
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    eventPublisher.publishEvent(new DepositCreditedEvent(
-                            request.getUserId(), currency.getSymbol(), amount, request.getTxHash()));
+                    sendDepositCreditedMessage(request.getUserId(), currency.getSymbol(), amount, request.getTxHash());
                 }
             });
+        }
+    }
+
+    /**
+     * 发送充值到账 Kafka 消息：key 取 userId（同用户消息进入同一分区，保证消费端按用户顺序推送），
+     * 消息体为 DepositCreditedEvent 的 JSON 序列化结果；
+     * 发送失败仅记录日志、不抛异常——不影响已提交的账本事务，下游可通过幂等重试/对账补偿。
+     */
+    private void sendDepositCreditedMessage(Long userId, String asset, BigDecimal amount, String txHash) {
+        try {
+            String payload = objectMapper.writeValueAsString(new DepositCreditedEvent(userId, asset, amount, txHash));
+            kafkaTemplate.send(notifyProperties.getDepositTopic(), String.valueOf(userId), payload)
+                    .whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            log.error("[deposit-notify] Kafka 发送失败 userId={} txHash={}: {}",
+                                    userId, txHash, ex.getMessage());
+                        }
+                    });
+        } catch (JsonProcessingException e) {
+            log.error("[deposit-notify] 消息序列化失败 txHash={}: {}", txHash, e.getMessage());
         }
     }
 

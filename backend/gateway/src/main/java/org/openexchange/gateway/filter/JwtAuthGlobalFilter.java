@@ -97,6 +97,7 @@ public class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
                 || path.equals("/api/v1/account/login")
                 || path.equals("/api/v1/account/refresh")
                 || path.startsWith("/api/public/")
+                || path.startsWith("/ws/")             // WS 握手用 query token 自行鉴权（如 /ws/user）
                 || path.equals("/favicon.ico")
                 || path.startsWith("/actuator/health");
     }

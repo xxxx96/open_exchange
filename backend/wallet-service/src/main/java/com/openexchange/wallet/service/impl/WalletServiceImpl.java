@@ -28,10 +28,6 @@ import java.math.RoundingMode;
 @RequiredArgsConstructor
 public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> implements IWalletService {
 
-    /**
-     * 现金钱包类型（wallets.wallet_type），现货余额记账均使用该类型
-     */
-    private static final String WALLET_TYPE_SPOT = "SPOT";
 
     private final ICurrencyService currencyService;
 
@@ -43,7 +39,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         Wallet wallet = getOne(Wrappers.<Wallet>lambdaQuery()
                 .eq(Wallet::getUserId, userId)
                 .eq(Wallet::getCurrencyId, currency.getId())
-                .eq(Wallet::getWalletType, WALLET_TYPE_SPOT), false);
+                .eq(Wallet::getWalletType, Wallet.WalletType.SPOT), false);
         BigDecimal available = wallet != null && wallet.getBalance() != null ? wallet.getBalance() : BigDecimal.ZERO;
         BigDecimal frozen = wallet != null && wallet.getFrozenBalance() != null ? wallet.getFrozenBalance() : BigDecimal.ZERO;
         // 3. total = available + frozen，全部换算为最小单位整数字符串，前端自行除以 decimals 展示
@@ -62,7 +58,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         Wallet wallet = getOne(Wrappers.<Wallet>lambdaQuery()
                 .eq(Wallet::getUserId, userId)
                 .eq(Wallet::getCurrencyId, currencyId)
-                .eq(Wallet::getWalletType, WALLET_TYPE_SPOT), false);
+                .eq(Wallet::getWalletType, Wallet.WalletType.SPOT), false);
         if (wallet != null) {
             return wallet;
         }
@@ -70,7 +66,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         Wallet created = new Wallet();
         created.setUserId(userId);
         created.setCurrencyId(currencyId);
-        created.setWalletType(WALLET_TYPE_SPOT);
+        created.setWalletType(Wallet.WalletType.SPOT);
         created.setBalance(BigDecimal.ZERO);
         created.setFrozenBalance(BigDecimal.ZERO);
         created.setVersion(0L);
@@ -81,7 +77,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
             return getOne(Wrappers.<Wallet>lambdaQuery()
                     .eq(Wallet::getUserId, userId)
                     .eq(Wallet::getCurrencyId, currencyId)
-                    .eq(Wallet::getWalletType, WALLET_TYPE_SPOT), false);
+                    .eq(Wallet::getWalletType, Wallet.WalletType.SPOT), false);
         }
     }
 

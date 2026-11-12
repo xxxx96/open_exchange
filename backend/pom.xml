@@ -23,6 +23,7 @@
         <module>user-service</module>
         <module>codegen</module>
         <module>wallet-service</module>
+        <module>spot-trade</module>
     </modules>
 
     <properties>

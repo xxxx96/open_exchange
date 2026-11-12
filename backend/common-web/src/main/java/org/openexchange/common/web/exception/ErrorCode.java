@@ -30,7 +30,19 @@ public enum ErrorCode {
     WALLET_NOT_FOUND(20010, "Wallet not found"),
     DUPLICATE_TRANSACTION(20011, "Duplicate transaction"),
     INVALID_2FA_CODE(20012, "Invalid 2FA code"),
-    WITHDRAWAL_LIMIT_EXCEEDED(20013, "Withdrawal limit exceeded");
+    WITHDRAWAL_LIMIT_EXCEEDED(20013, "Withdrawal limit exceeded"),
+
+    // Spot trading errors（现货交易 6xxxx）
+    // 注：与 2xxxx 段的 INSUFFICIENT_BALANCE 语义相同，但分属不同服务的错误码段，
+    // 现货 API 契约约定余额不足返回 60001，故单独命名避免枚举常量重名。
+    SPOT_INSUFFICIENT_BALANCE(60001, "余额不足"),
+    INVALID_PRICE(60002, "价格不符合交易规则"),
+    INVALID_QUANTITY(60003, "数量不符合交易规则"),
+    ORDER_NOT_CANCELABLE(60004, "订单状态不允许撤销"),
+    PRICE_DEVIATION_TOO_LARGE(60005, "价格偏离超过限制"),
+    DAILY_LIMIT_EXCEEDED(60006, "超过单日下单限额"),
+    TRADING_PAIR_OFFLINE(60007, "交易对未上线"),
+    SINGLE_ORDER_LIMIT_EXCEEDED(60008, "超过单笔下单限额");
 
     private final int code;
     private final String message;

@@ -9,6 +9,17 @@ spring:
   cloud:
     gateway:
       routes:
+        # Spot Trading REST（下单/撤单/查订单/查成交/余额）——须置于 user-service 之前，
+        # 否则 /api/v1/account/balance 会被 /api/v1/account/** 抢先匹配
+        - id: spot-trade-api
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/v1/order,/api/v1/order/**,/api/v1/trades/**,/api/v1/account/balance
+        # Spot Trading WebSocket（token 走 query 参数，握手时自行鉴权，网关放行）
+        - id: spot-trade-ws
+          uri: http://localhost:8084
+          predicates:
+            - Path=/ws/user
         # User Service
         - id: user-service
           uri: http://localhost:8081

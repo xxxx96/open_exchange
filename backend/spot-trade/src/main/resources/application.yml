@@ -1,0 +1,62 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: spot-trade-service
+  datasource:
+    # PostgreSQL 连接：通过环境变量注入，默认指向本机 exchange 库
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:exchange}
+    username: ${DB_USER:exchange}
+    password: ${DB_PASSWORD:exchange}
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+    consumer:
+      group-id: spot-trade-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+# WS 握手鉴权：与 gateway / user-service 使用同一把 access token 公钥（RSA，Base64(X.509)）
+jwt:
+  access-token-public-secret: ${JWT_ACCESS_PUBLIC_SECRET:changeme-access-secret-key-min-256-bits}
+
+# 现货交易业务配置
+spot:
+  trade:
+    # 撮合队列主题前缀：完整主题 = 前缀 + symbol 小写（BTC/USDT → order-btc/usdt）
+    order-topic-prefix: ${SPOT_ORDER_TOPIC_PREFIX:order-}
+    # 清算事件主题（撮合引擎产出：撤单完成、成交）
+    clearing-topic: ${SPOT_CLEARING_TOPIC:spot.clearing}
+    # 用户事件推送主题（WS 网关消费，key = userId 保证同用户有序）
+    user-event-topic: ${SPOT_USER_EVENT_TOPIC:spot.user.events}
+  risk:
+    # 单笔下单名义价值上限（计价币人可读单位，如 USDT）
+    max-order-notional: ${SPOT_RISK_MAX_ORDER_NOTIONAL:1000000}
+    # 单用户单日累计下单名义价值上限（计价币人可读单位）
+    daily-order-notional-limit: ${SPOT_RISK_DAILY_LIMIT:10000000}
+    # 限价单相对市场参考价的最大偏离比例（0.10 = 10%）
+    max-price-deviation: ${SPOT_RISK_MAX_PRICE_DEVIATION:0.10}
+  ws:
+    # 单用户最大并发连接数
+    max-connections-per-user: ${SPOT_WS_MAX_CONNECTIONS:5}
+    # 心跳超时（秒）：超过该时长未收到任何客户端消息则断开
+    heartbeat-timeout-seconds: ${SPOT_WS_HEARTBEAT_TIMEOUT:30}
+    # 心跳巡检间隔（毫秒）
+    heartbeat-check-interval-ms: ${SPOT_WS_HEARTBEAT_CHECK_INTERVAL:10000}
+    # 用户事件消费者组前缀：每个 WS 节点使用独立消费者组（前缀 + UUID），
+    # 保证多节点部署时每个节点都能收到全量用户事件并按本地连接路由（等价多节点广播）
+    consumer-group-prefix: ${SPOT_WS_CONSUMER_GROUP_PREFIX:spot-ws-}
+
+logging:
+  level:
+    com.openexchange.spot: DEBUG

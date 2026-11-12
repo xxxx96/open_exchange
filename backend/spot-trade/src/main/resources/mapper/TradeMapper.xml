@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.openexchange.spot.mapper.TradeMapper">
+
+    <!--
+      「我的成交」：按用户（挂单方或吃单方）+ 交易对/订单/时间范围过滤，按 id 倒序游标分页。
+      列别名统一使用蛇形，由 map-underscore-to-camel-case 映射到 TradeRow 属性；
+      is_buyer_maker 别名为 buyer_maker（对应 buyerMaker 属性）。
+    -->
+    <select id="selectMyTrades" resultType="com.openexchange.spot.dto.TradeRow">
+        SELECT
+            t.id                AS id,
+            t.trade_id          AS trade_id,
+            t.pair_id           AS pair_id,
+            t.maker_order_id    AS maker_order_id,
+            t.taker_order_id    AS taker_order_id,
+            t.maker_user_id     AS maker_user_id,
+            t.taker_user_id     AS taker_user_id,
+            t.price             AS price,
+            t.qty               AS qty,
+            t.quote_amount      AS quote_amount,
+            t.maker_fee         AS maker_fee,
+            t.taker_fee         AS taker_fee,
+            t.is_buyer_maker    AS buyer_maker,
+            t.executed_at       AS executed_at,
+            mo.order_id         AS maker_order_no,
+            tk.order_id         AS taker_order_no
+        FROM trades t
+        JOIN trading_pairs tp ON tp.id = t.pair_id
+        JOIN orders mo ON mo.id = t.maker_order_id
+        JOIN orders tk ON tk.id = t.taker_order_id
+        WHERE (t.maker_user_id = #{userId} OR t.taker_user_id = #{userId})
+        <if test="pairId != null">
+            AND t.pair_id = #{pairId}
+        </if>
+        <if test="orderPkId != null">
+            AND (t.maker_order_id = #{orderPkId} OR t.taker_order_id = #{orderPkId})
+        </if>
+        <if test="startTime != null">
+            AND t.executed_at &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND t.executed_at &lt;= #{endTime}
+        </if>
+        <if test="beforeId != null">
+            AND t.id &lt; #{beforeId}
+        </if>
+        ORDER BY t.id DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 游标定位：按对外成交号取内部主键 -->
+    <select id="selectIdByTradeId" resultType="java.lang.Long">
+        SELECT id FROM trades WHERE trade_id = #{tradeId} LIMIT 1
+    </select>
+
+    <!-- 该交易对最近一笔成交价（风控偏离校验参考价） -->
+    <select id="selectLastPrice" resultType="java.math.BigDecimal">
+        SELECT price FROM trades WHERE pair_id = #{pairId} ORDER BY id DESC LIMIT 1
+    </select>
+
+    <!-- 成交自然键去重：撮合引擎 at-least-once 投递时防止重复结算 -->
+    <select id="countByNaturalKey" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM trades
+        WHERE maker_order_id = #{makerOrderId}
+          AND taker_order_id = #{takerOrderId}
+          AND price = #{price}
+          AND qty = #{qty}
+          AND executed_at = #{executedAt}
+    </select>
+
+</mapper>

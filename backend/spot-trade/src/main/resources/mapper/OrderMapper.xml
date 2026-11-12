@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.openexchange.spot.mapper.OrderMapper">
+
+    <!-- 幂等查询：同一用户同一 clientOrderId 的既有订单 -->
+    <select id="selectByClientOrderId" resultType="com.openexchange.spot.entity.Order">
+        SELECT * FROM orders
+        WHERE user_id = #{userId} AND client_order_id = #{clientOrderId}
+        LIMIT 1
+    </select>
+
+    <!-- 按对外订单号查询（限定用户，防越权） -->
+    <select id="selectByOrderIdAndUser" resultType="com.openexchange.spot.entity.Order">
+        SELECT * FROM orders
+        WHERE user_id = #{userId} AND order_id = #{orderId}
+        LIMIT 1
+    </select>
+
+    <!-- 按对外订单号查询（不限用户，清算消费者按引擎事件定位订单） -->
+    <select id="selectByOrderId" resultType="com.openexchange.spot.entity.Order">
+        SELECT * FROM orders
+        WHERE order_id = #{orderId}
+        LIMIT 1
+    </select>
+
+    <!--
+      单日累计下单名义价值（计价币人可读单位）：
+      限价单 = price × original_qty；市价买单 = quote_qty（花多少计价币）；
+      市价卖单无委托价，取已成交金额（下单时刻为 0，成交后由清算回写）。
+    -->
+    <select id="sumTodayNotional" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(
+            CASE
+                WHEN order_type = 'LIMIT' AND price IS NOT NULL THEN price * original_qty
+                WHEN quote_qty IS NOT NULL THEN quote_qty
+                ELSE COALESCE(executed_quote, 0)
+            END
+        ), 0)
+        FROM orders
+        WHERE user_id = #{userId}
+          AND created_at >= #{dayStart}
+          AND status &lt;&gt; 'REJECTED'
+    </select>
+
+    <!--
+      成交回写：累加已成交数量/金额/手续费，平均成交价 = 累计成交金额 / 累计成交数量。
+      status 条件作为乐观并发控制：重复成交事件命中 0 行，调用方据此跳过结算（幂等）。
+    -->
+    <update id="applyFill">
+        UPDATE orders
+        SET executed_qty = COALESCE(executed_qty, 0) + #{executedQty},
+            executed_quote = COALESCE(executed_quote, 0) + #{executedQuote},
+            fee = COALESCE(fee, 0) + #{fee},
+            avg_fill_price = CASE
+                WHEN COALESCE(executed_qty, 0) + #{executedQty} &gt; 0
+                    THEN (COALESCE(executed_quote, 0) + #{executedQuote})
+                         / (COALESCE(executed_qty, 0) + #{executedQty})
+                ELSE avg_fill_price
+            END,
+            status = CASE WHEN #{filled} THEN 'FILLED' ELSE 'PARTIALLY_FILLED' END,
+            updated_at = NOW()
+        WHERE id = #{orderId}
+          AND status IN ('NEW', 'PARTIALLY_FILLED')
+    </update>
+
+    <!-- 撤销回写：仅 NEW / PARTIALLY_FILLED 可置 CANCELED，重复事件命中 0 行 -->
+    <update id="markCanceled">
+        UPDATE orders
+        SET status = 'CANCELED',
+            updated_at = NOW()
+        WHERE id = #{orderId}
+          AND status IN ('NEW', 'PARTIALLY_FILLED')
+    </update>
+
+</mapper>
