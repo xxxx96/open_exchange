@@ -45,10 +45,25 @@ public class OrderController {
 
     @Operation(summary = "撤单",
             description = "仅能撤销本人且处于 NEW / PARTIALLY_FILLED 的订单（否则 60004）。"
+                    + "参数支持 Body 或 Query 二选一（Query 参数仅在未提供 Body 时生效）。"
                     + "返回 status=CANCELED 表示撤单已受理，最终状态以 WS 推送为准。")
     @DeleteMapping
-    public ApiResponse<OrderVO> cancel(@CurrentUserId Long userId, @RequestBody OrderCancelRequest request) {
-        return ApiResponse.success(orderService.cancelOrder(userId, request));
+    public ApiResponse<OrderVO> cancel(@CurrentUserId Long userId,
+                                       @RequestBody(required = false) OrderCancelRequest request,
+                                       @RequestParam(required = false) String symbol,
+                                       @RequestParam(required = false) String orderId,
+                                       @RequestParam(required = false) String clientOrderId) {
+        OrderCancelRequest req = request != null ? request : new OrderCancelRequest();
+        if (req.getSymbol() == null) {
+            req.setSymbol(symbol);
+        }
+        if (req.getOrderId() == null) {
+            req.setOrderId(orderId);
+        }
+        if (req.getClientOrderId() == null) {
+            req.setClientOrderId(clientOrderId);
+        }
+        return ApiResponse.success(orderService.cancelOrder(userId, req));
     }
 
     @Operation(summary = "查订单",

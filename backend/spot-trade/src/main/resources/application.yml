@@ -20,6 +20,12 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  data:
+    redis:
+      # infrastructure/docker-compose.yml 的 exchange-redis 容器
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2s
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -56,6 +62,12 @@ spot:
     # 用户事件消费者组前缀：每个 WS 节点使用独立消费者组（前缀 + UUID），
     # 保证多节点部署时每个节点都能收到全量用户事件并按本地连接路由（等价多节点广播）
     consumer-group-prefix: ${SPOT_WS_CONSUMER_GROUP_PREFIX:spot-ws-}
+  balance:
+    # 余额查询 Redis 缓存 TTL（毫秒，key = spot:balance:{userId}）；余额变动时主动 DEL，0 表示关闭缓存
+    cache-ttl-millis: ${SPOT_BALANCE_CACHE_TTL:3000}
+  cache:
+    # 交易对/币种字典 Redis 缓存 TTL（秒，key = spot:dict:*）；后台改配置后最迟 TTL 生效，0 表示关闭
+    dictionary-ttl-seconds: ${SPOT_DICTIONARY_CACHE_TTL:60}
 
 logging:
   level:

@@ -1,3 +1,11 @@
+spring:
+  data:
+    redis:
+      # infrastructure/docker-compose.yml 的 exchange-redis 容器（refresh token 吊销黑名单）
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2s
+
 jwt:
   access-token-private-key: ${ACCESS-TOKEN-PRIVATE-KEY}
   access-token-public-key: ${ACCESS-TOKEN-PUBLIC-KEY}

@@ -51,6 +51,11 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
+        <!-- Redis：余额查询短 TTL 缓存（infrastructure/docker-compose.yml 提供 exchange-redis） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
         <!-- JWT：WS 握手时用 user-service 同源公钥校验 token -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

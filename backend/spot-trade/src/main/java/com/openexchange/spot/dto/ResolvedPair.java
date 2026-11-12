@@ -4,6 +4,7 @@ import com.openexchange.spot.entity.Currency;
 import com.openexchange.spot.entity.TradingPair;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * 交易对解析结果：交易对 + 基础币/计价币 + 展示符号（BTC/USDT）。
@@ -11,6 +12,7 @@ import lombok.Data;
  */
 @Data
 @Builder
+@Jacksonized
 public class ResolvedPair {
 
     private TradingPair pair;

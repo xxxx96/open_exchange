@@ -33,8 +33,8 @@ public class SpotBalanceController {
     private final ISpotBalanceService spotBalanceService;
 
     @Operation(summary = "交易账户余额",
-            description = "账本权威，直接读库；金额为最小单位整数字符串。"
-                    + "asset 不传返回全部非零资产，传入则只返回该资产。")
+            description = "账本权威：读库结果经 Redis 短 TTL（默认 3 秒）缓存，余额变动即时失效；"
+                    + "金额为最小单位整数字符串。asset 不传返回全部非零资产，传入则只返回该资产。")
     @GetMapping("/balance")
     public ApiResponse<List<BalanceVO>> balance(@CurrentUserId Long userId,
                                                 @RequestParam(required = false) String asset) {

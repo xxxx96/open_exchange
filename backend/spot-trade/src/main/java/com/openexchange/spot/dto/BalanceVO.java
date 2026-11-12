@@ -3,6 +3,7 @@ package com.openexchange.spot.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
 /**
  * 交易账户余额：total = available + locked，金额为最小单位整数字符串。
@@ -10,6 +11,7 @@ import lombok.Data;
  */
 @Data
 @Builder
+@Jacksonized
 @Schema(name = "BalanceVO", description = "交易账户余额")
 public class BalanceVO {
 

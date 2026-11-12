@@ -17,6 +17,8 @@ public class SpotTradeProperties {
     private final Trade trade = new Trade();
     private final Risk risk = new Risk();
     private final Ws ws = new Ws();
+    private final Balance balance = new Balance();
+    private final Cache cache = new Cache();
 
     @Data
     public static class Trade {
@@ -50,5 +52,23 @@ public class SpotTradeProperties {
          * 等价于多节点广播（无需额外引入 Redis pub/sub）。
          */
         private String consumerGroupPrefix = "spot-ws-";
+    }
+
+    @Data
+    public static class Balance {
+        /**
+         * 余额查询 Redis 缓存 TTL（毫秒）。该接口调用频率高，读库前先查 Redis（key = spot:balance:{userId}）；
+         * 任何余额变动（冻结/解冻/入账/核销）都会主动 DEL 对应缓存，最脏窗口 = TTL。0 表示关闭缓存。
+         */
+        private long cacheTtlMillis = 3000;
+    }
+
+    @Data
+    public static class Cache {
+        /**
+         * 交易对 / 币种字典缓存 TTL（秒）。字典几乎不变但下单热路径每次都要读，
+         * 缓存后可省掉每单 3~4 次数据库查询；后台改配置后最迟 TTL 生效。0 表示关闭缓存。
+         */
+        private long dictionaryTtlSeconds = 60;
     }
 }
